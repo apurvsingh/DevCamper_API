@@ -14,14 +14,16 @@ connectDb();
 
 const app = express();
 
-//Route Files
-const bootcamps = require("./routes/bootcamps");
+//Body Parser
+app.use(express.json());
 
 //Dev logging middleware
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
 
+//Route Files
+const bootcamps = require("./routes/bootcamps");
 //Mount routers
 app.use("/api/v1/bootcamps", bootcamps);
 
