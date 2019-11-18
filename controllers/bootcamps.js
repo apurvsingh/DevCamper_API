@@ -13,9 +13,7 @@ exports.getBootcamps = async (req, res, next) => {
             data: bootcampData
         });
     } catch (err) {
-        res.status(404).json({
-            success:false
-        });
+        next(err);
     }
 };
 
@@ -26,15 +24,14 @@ exports.getBootcamp = async (req, res, next) => {
     try {
         const bootcampById = await Bootcamp.findById(req.params.id).lean();
         if(!bootcampById){
-            return next(new ErrorResponse(`Bootcamp not found with id ${req.params.id}`, 404));
+            return setResponseStatusForMissingBootcamp(req.params.id, next);
         }
         res.status(200).json({
             success: true,
             data: bootcampById
         });
     } catch (err) {
-        next(new ErrorResponse(`Bootcamp not found with id ${req.params.id}`, 404));
-
+        next(err);
     }
 }
 
@@ -50,10 +47,7 @@ exports.createBootcamp = async ( req, res, next) => {
         data: newBootcamp
     });
     }catch (err) {
-            res.status(400).json({
-            success:false
-        });
-        console.log(err);
+        next(err);
     }
 }
 
@@ -68,7 +62,7 @@ exports.updateBootcamp = async (req, res, next) => {
         });
         
         if(!bootcampById){
-            return res.status(400).json({success:false});
+            return setResponseStatusForMissingBootcamp(req.params.id, next);
         }
 
         return res.status(200).json({
@@ -76,9 +70,7 @@ exports.updateBootcamp = async (req, res, next) => {
             data: bootcampById
         });
     } catch (err) {
-        return res.status(400).json({
-            success:false
-        })
+        next(err);
     }
 }
 
@@ -89,7 +81,8 @@ exports.deleteBootcamp = async (req, res, next) => {
     try {
         bootcampById = await Bootcamp.findByIdAndDelete(req.params.id);
         if(!bootcampById){
-            return res.status(400).json({success:false});
+            return setResponseStatusForMissingBootcamp(req.params.id, next);
+
         }
 
         return res.status(200).json({
@@ -97,6 +90,10 @@ exports.deleteBootcamp = async (req, res, next) => {
         msg: `Deleted bootcamp with id ${req.params.id}`
     });
     } catch (err) {
-        return res.status(400).json({success:false});
+        next(err);
     }
+}
+
+function setResponseStatusForMissingBootcamp (id, next){
+    return next(new ErrorResponse(`Bootcamp not found with id ${id}`, 404));
 }
